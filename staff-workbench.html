@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛡️ 极光游戏港 · 管理团队协同工作台</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .wb-container {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .wb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 32px;
+    }
+    .wb-tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 12px;
+    }
+    .wb-tab-btn {
+      padding: 10px 22px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: var(--glass-bg);
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .wb-tab-btn:hover {
+      background: var(--glass-bg-hover);
+      color: var(--text-main);
+    }
+    .wb-tab-btn.active {
+      background: var(--accent-color);
+      color: #fff;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .wb-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+    .submission-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .sandbox-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .sandbox-modal.active {
+      display: flex;
+    }
+    .sandbox-inner {
+      width: 100%;
+      max-width: 900px;
+      background: #0f172a;
+      border: 1px solid var(--glass-border-hover);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+
+    /* 管理团队身份核验门禁 */
+    .staff-auth-gate {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(3, 7, 18, 0.92);
+      backdrop-filter: blur(20px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .staff-auth-gate.hidden {
+      display: none;
+    }
+    .gate-card {
+      background: #0b0f19;
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      border-radius: var(--radius-xl);
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 0 50px rgba(99, 102, 241, 0.2);
+    }
+    .gate-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .gate-icon {
+      font-size: 44px;
+      margin-bottom: 8px;
+    }
+    .gate-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .gate-subtitle {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--accent-secondary);
+      margin-top: 4px;
+      font-weight: 700;
+    }
+    .gate-error-banner {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .gate-error-banner.show {
+      display: flex;
+    }
+    .gate-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .gate-input-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .gate-text-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .gate-text-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       1. 管理团队专属三重凭证核验门禁终端
+       ========================================== -->
+  <div id="staffAuthGate" class="staff-auth-gate">
+    <div class="gate-card">
+      <div class="gate-header">
+        <div class="gate-icon">🛡️</div>
+        <h2 class="gate-title">管理团队身份核验终端</h2>
+        <p class="gate-subtitle">STAFF SECURE TRIPLE-FACTOR AUTHENTICATION</p>
+      </div>
+
+      <div id="staffGateErrorBanner" class="gate-error-banner">
+        <span>⚠️</span>
+        <span id="staffGateErrorText">核验未通过，请核对凭证！</span>
+      </div>
+
+      <form id="staffGateForm" autocomplete="off">
+        <div class="gate-input-group">
+          <label class="gate-input-label">1. 管理员电子邮箱 (Email) *</label>
+          <input type="email" id="staffGateEmail" class="gate-text-input" placeholder="请输入绑定的管理员邮箱" required autocomplete="off">
+        </div>
+
+        <div class="gate-input-group">
+          <label class="gate-input-label">2. 管理员用户名 (Username) *</label>
+          <input type="text" id="staffGateUsername" class="gate-text-input" placeholder="请输入管理员用户名" required autocomplete="off">
+        </div>
+
+        <div class="gate-input-group">
+          <label class="gate-input-label">3. 安全登录密码 (Password) *</label>
+          <input type="password" id="staffGatePassword" class="gate-text-input" placeholder="请输入安全密码" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-size: 15px; font-weight: 800; margin-top: 8px;">
+          ⚡ 核验证件并解锁工作台
+        </button>
+
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); margin-top: 14px;">
+          <span>支持审核员 / 控制员 / 巡查员 / 封控员 / 站长</span>
+          <a href="index.html" style="color: var(--text-muted); text-decoration: none;">← 返回大厅</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       2. 协同工作台主容器
+       ========================================== -->
+  <div id="staffWorkbenchApp" class="wb-container" style="display: none;">
+    <!-- 工作台顶栏 -->
+    <header class="glass-panel wb-header">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div class="brand-logo">🛡️</div>
+        <div>
+          <h1 style="font-size: 20px; font-weight: 800;">管理团队协同工作台</h1>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            当前执勤身份：<strong id="myRoleTag" style="color: var(--accent-secondary);">未登录</strong>
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button id="lockStaffTerminalBtn" class="stage-control-btn" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4);">
+          🔒 锁定工作台
+        </button>
+        <a href="admin-portal/index.html" class="action-link-btn" style="background: rgba(245, 158, 11, 0.2); border-color: var(--gold-primary); color: #fbbf24; font-weight: 700;">
+          👑 站长最高独立控制台
+        </a>
+        <a href="index.html" class="action-link-btn">← 返回大厅</a>
+      </div>
+    </header>
+
+    <!-- 工作台功能选项卡 -->
+    <div class="wb-tabs">
+      <button class="wb-tab-btn active" data-tab="review">🎮 游戏初审 (审核员)</button>
+      <button class="wb-tab-btn" data-tab="release">⚙️ 终审发布 (控制员)</button>
+      <button class="wb-tab-btn" data-tab="inspect">👁️ 巡查取证 (巡查员)</button>
+      <button class="wb-tab-btn" data-tab="enforce">🛡️ 违规封控 (封控员)</button>
+    </div>
+
+    <!-- 选项卡 1：游戏初审 (审核员专属) -->
+    <section id="pane-review" class="wb-card">
+      <h2 style="font-size: 18px; margin-bottom: 8px;">🎮 待初审试玩游戏队列</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        职责：进入隔离沙箱试玩、排查有无恶性 Bug、死锁或违规脚本，并提交评估报告给后台控制员。
+      </p>
+      <div id="reviewQueueList">
+        <!-- 动态生成 -->
+      </div>
+    </section>
+
+    <!-- 选项卡 2：终审发布 (控制员专属) -->
+    <section id="pane-release" class="wb-card" style="display: none;">
+      <h2 style="font-size: 18px; margin-bottom: 8px;">⚙️ 终审与发布上架控制台</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        职责：审阅审核员提交的初审试玩报告，最终确认并一键【全网上架】或【驳回反馈】。
+      </p>
+      <div id="releaseQueueList">
+        <!-- 动态生成 -->
+      </div>
+    </section>
+
+    <!-- 选项卡 3：巡查取证 (巡查员专属) -->
+    <section id="pane-inspect" class="wb-card" style="display: none;">
+      <h2 style="font-size: 18px; margin-bottom: 8px;">👁️ 社区日常巡查与违规工单提交</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        职责：巡视全站游戏、排行榜与用户行为，发现违规即刻生成取证工单推给封控员。
+      </p>
+      
+      <form id="inspectForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">涉嫌违规的用户名 / 账号 *</label>
+          <input type="text" id="ticketTarget" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" placeholder="例如：cheater_01" required>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">违规类型 *</label>
+          <select id="ticketType" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px; background: #0f172a;" required>
+            <option value="作弊刷分">🏆 异常利用漏洞/修改器刷高分</option>
+            <option value="恶意脚本">⚠️ 上传破坏性/跳网页恶意代码</option>
+            <option value="违规命名/广告">📢 昵称或描述包含垃圾广告</option>
+            <option value="其他违规">🚨 其他破坏平台秩序行为</option>
+          </select>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label style="font-size: 13px; font-weight: 600;">取证描述与事实说明 *</label>
+          <textarea id="ticketEvidence" class="search-input" style="width: 100%; height: 80px; border-radius: 8px; margin-top: 6px;" placeholder="简述巡查发现的异常事实..." required></textarea>
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+          <button type="submit" class="stage-control-btn" style="background: var(--accent-color); border: none; padding: 10px 24px; font-weight: 700;">
+            📤 提交违规工单给封控员
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 选项卡 4：违规封控 (封控员专属) -->
+    <section id="pane-enforce" class="wb-card" style="display: none;">
+      <h2 style="font-size: 18px; margin-bottom: 8px;">🛡️ 违规工单裁决与阶梯封控</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+        职责：接收巡查员取证工单，执行警告、禁止投稿或全站封号制裁。
+      </p>
+      <div id="enforceQueueList">
+        <!-- 动态生成 -->
+      </div>
+    </section>
+  </div>
+
+  <!-- 隔离沙箱试玩弹窗 -->
+  <div id="sandboxModal" class="sandbox-modal">
+    <div class="sandbox-inner">
+      <div style="padding: 12px 20px; background: rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-weight: 700; color: var(--accent-secondary);" id="sandboxTitle">🔒 安全隔离沙箱试玩器</div>
+        <button id="closeSandboxBtn" class="stage-control-btn" style="padding: 4px 12px;">✕ 关闭试玩</button>
+      </div>
+      <iframe id="sandboxFrame" style="width: 100%; flex: 1; border: none; background: #000;" sandbox="allow-scripts allow-forms allow-pointer-lock"></iframe>
+    </div>
+  </div>
+
+  <script src="js/games-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/workbench.js"></script>
+</body>
+</html>

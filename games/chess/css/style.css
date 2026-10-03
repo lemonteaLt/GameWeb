@@ -1,0 +1,735 @@
+/* =========================================================
+   王国征伐 3D · 中世纪史诗 3D 棋盘样式表 (3D Medieval CSS)
+   ========================================================= */
+
+:root {
+  --bg-medieval: #0b0d14;
+  --bg-panel: rgba(18, 22, 33, 0.92);
+  --bg-parchment: rgba(28, 33, 48, 0.85);
+
+  --color-gold-bright: #ffe57f;
+  --color-gold: #d4af37;
+  --color-gold-dark: #8c6d1f;
+  --color-crimson: #d32f2f;
+  --color-azure: #1e88e5;
+  --color-azure-bright: #64b5f6;
+
+  --font-title: 'Cinzel', 'Noto Serif SC', serif;
+  --font-text: 'Cinzel', 'Noto Serif SC', serif;
+  --font-medieval: 'MedievalSharp', cursive, serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  background-color: var(--bg-medieval);
+  color: #f0e6d6;
+  font-family: var(--font-text);
+}
+
+/* 背景粒子画布 */
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+/* 屏幕暗角 */
+.screen-vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(4, 6, 10, 0.92) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 战火与将军闪烁 */
+.check-flash-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  box-shadow: inset 0 0 100px 30px rgba(211, 47, 47, 0.65);
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.check-flash-effect.active {
+  opacity: 1;
+  animation: pulse-war 1s infinite alternate;
+}
+@keyframes pulse-war {
+  0% { box-shadow: inset 0 0 60px 20px rgba(211, 47, 47, 0.4); }
+  100% { box-shadow: inset 0 0 120px 45px rgba(211, 47, 47, 0.85); }
+}
+
+/* 总体对决布局 */
+.game-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 10px 24px;
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
+/* 顶部王国战役标题栏 */
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 6px 0 12px 0;
+  text-align: center;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.35);
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, transparent, rgba(35, 42, 60, 0.4), transparent);
+}
+.header-crest {
+  font-size: 26px;
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.5));
+  animation: crest-float 3s ease-in-out infinite alternate;
+}
+@keyframes crest-float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+.title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.royal-ribbon {
+  background: linear-gradient(90deg, transparent, rgba(140, 109, 31, 0.6), transparent);
+  padding: 2px 16px;
+  margin-bottom: 2px;
+}
+.ribbon-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-gold-bright);
+  letter-spacing: 3px;
+}
+.game-title {
+  font-family: var(--font-title);
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7dfa5 45%, #b58d34 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 3px 15px rgba(212, 175, 55, 0.4);
+}
+.game-subtitle {
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: #c9bda8;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* 主对决战区网格 */
+.duel-arena {
+  display: grid;
+  grid-template-columns: 290px 1fr 290px;
+  gap: 20px;
+  align-items: start;
+  flex: 1;
+}
+
+/* 王国阵营侧栏面板 */
+.player-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid #333c50;
+  border-radius: 8px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.player-panel.active-turn {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(212, 175, 55, 0.15);
+}
+
+.panel-banner-decor {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+.white-banner {
+  background: linear-gradient(90deg, #1c355e 0%, #2a4d80 50%, #1c355e 100%);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(100, 181, 246, 0.8);
+}
+.black-banner {
+  background: linear-gradient(90deg, #3d1c1c 0%, #612323 50%, #3d1c1c 100%);
+  color: #ffcdd2;
+  text-shadow: 0 0 8px rgba(239, 83, 80, 0.8);
+}
+
+.panel-inner {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 统帅头像 */
+.avatar-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar-frame {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid var(--color-gold);
+  background: radial-gradient(circle, #252e42 0%, #0f121a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
+}
+.avatar-icon {
+  font-size: 26px;
+}
+.player-info {
+  display: flex;
+  flex-direction: column;
+}
+.player-role {
+  font-size: 11px;
+  color: #a69a88;
+  letter-spacing: 1px;
+}
+.player-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+/* 计时器徽章 */
+.timer-badge {
+  background: rgba(8, 10, 15, 0.85);
+  border: 1px solid #4a546e;
+  border-radius: 4px;
+  font-family: 'Cinzel', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 0;
+  letter-spacing: 3px;
+  color: #e8ded1;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+.active-turn .timer-badge {
+  color: var(--color-gold-bright);
+  border-color: var(--color-gold);
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* 战利品折损区 */
+.graveyard-section {
+  background: rgba(10, 13, 20, 0.7);
+  border: 1px solid #2e364a;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.graveyard-title {
+  font-size: 11px;
+  color: #b5a896;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.graveyard-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-height: 44px;
+  align-items: center;
+}
+.graveyard-piece {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+  transition: transform 0.2s;
+}
+.graveyard-piece:hover {
+  transform: scale(1.3);
+}
+.material-advantage {
+  font-size: 12px;
+  color: var(--color-gold);
+  font-weight: 700;
+  margin-top: 4px;
+  text-align: right;
+  min-height: 16px;
+}
+
+/* 控制台表单与按钮 */
+.control-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.control-label {
+  font-size: 11px;
+  color: #b5a896;
+  letter-spacing: 1px;
+}
+.medieval-select {
+  background: #10131c;
+  color: #f0e6d6;
+  border: 1px solid #424c64;
+  padding: 7px 10px;
+  border-radius: 4px;
+  font-family: var(--font-text);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.medieval-select:focus, .medieval-select:hover {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+.sub-buttons {
+  margin-top: -2px;
+}
+.medieval-btn {
+  flex: 1;
+  background: linear-gradient(180deg, #2c344a 0%, #161c28 100%);
+  color: #f7eedf;
+  border: 1px solid #4f5d7c;
+  padding: 8px 6px;
+  border-radius: 4px;
+  font-family: var(--font-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+}
+.medieval-btn:hover {
+  border-color: var(--color-gold-bright);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+}
+.medieval-btn:active {
+  transform: translateY(0);
+}
+.medieval-btn.btn-danger {
+  border-color: #8b2222;
+  background: linear-gradient(180deg, #4d1c1c 0%, #240d0d 100%);
+}
+.medieval-btn.btn-danger:hover {
+  border-color: var(--color-crimson);
+  box-shadow: 0 0 15px rgba(211, 47, 47, 0.45);
+}
+.medieval-btn.btn-sm {
+  padding: 6px 4px;
+  font-size: 11px;
+}
+
+/* 羊皮纸军报战报 */
+.history-box {
+  background: rgba(8, 10, 16, 0.85);
+  border: 1px solid #313a4e;
+  border-radius: 4px;
+  padding: 8px;
+}
+.history-title {
+  font-size: 11px;
+  color: #bfae9b;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.history-list {
+  max-height: 110px;
+  overflow-y: auto;
+  font-size: 12px;
+  font-family: 'Cinzel', monospace;
+  color: #d1c5b4;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+.history-list::-webkit-scrollbar-thumb {
+  background: #46536f;
+  border-radius: 2px;
+}
+.history-item {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+.history-item:nth-child(even) {
+  background: rgba(255, 255, 255, 0.04);
+}
+.history-empty {
+  color: #6d7b91;
+  font-style: italic;
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* =========================================================
+   3D 棋盘渲染视口与外框 (3D Chess Board Viewport & Controls)
+   ========================================================= */
+.board-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.board-3d-container {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  height: 560px;
+  background: radial-gradient(circle at center, #181d29 0%, #080a10 100%);
+  border: 3px solid #5a4632;
+  border-radius: 12px;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 35px rgba(212, 175, 55, 0.25),
+    inset 0 0 30px rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+}
+
+.chess-3d-viewport {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+.chess-3d-viewport:active {
+  cursor: grabbing;
+}
+.chess-3d-viewport canvas {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+}
+
+/* 城堡铜质角饰 */
+.castle-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-gold);
+  pointer-events: none;
+  z-index: 10;
+}
+.castle-corner.top-left {
+  top: 6px;
+  left: 6px;
+  border-right: none;
+  border-bottom: none;
+}
+.castle-corner.top-right {
+  top: 6px;
+  right: 6px;
+  border-left: none;
+  border-bottom: none;
+}
+.castle-corner.bottom-left {
+  bottom: 6px;
+  left: 6px;
+  border-right: none;
+  border-top: none;
+}
+.castle-corner.bottom-right {
+  bottom: 6px;
+  right: 6px;
+  border-left: none;
+  border-top: none;
+}
+
+/* 3D 浮动视角选择栏 */
+.view-controls {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  z-index: 15;
+  background: rgba(14, 18, 28, 0.8);
+  backdrop-filter: blur(6px);
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+.view-btn {
+  background: transparent;
+  border: none;
+  color: #c9bda8;
+  font-family: var(--font-text);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.view-btn.active {
+  background: linear-gradient(180deg, #3d4a6a 0%, #1c2436 100%);
+  color: var(--color-gold-bright);
+  border: 1px solid var(--color-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.35);
+}
+
+/* 视口底部提示文本 */
+.viewport-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #7b889e;
+  pointer-events: none;
+  z-index: 10;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* 回合状态横幅 */
+.turn-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 26px;
+  border-radius: 20px;
+  background: rgba(16, 20, 30, 0.95);
+  border: 2px solid var(--color-gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+}
+.turn-banner.turn-white {
+  border-color: #64b5f6;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(100, 181, 246, 0.6);
+}
+.turn-banner.turn-black {
+  border-color: #ef5350;
+  color: #ffebee;
+  text-shadow: 0 0 10px rgba(239, 83, 80, 0.6);
+}
+.banner-heraldry {
+  color: var(--color-gold-bright);
+}
+
+/* =========================================================
+   中世纪封臣加冕与战役结算弹窗 (Modals)
+   ========================================================= */
+.medieval-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+.medieval-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 5, 10, 0.88);
+  backdrop-filter: blur(8px);
+}
+.modal-card {
+  position: relative;
+  z-index: 10;
+  background: linear-gradient(145deg, #22293a 0%, #10141e 100%);
+  border: 3px solid var(--color-gold);
+  border-radius: 10px;
+  padding: 28px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(212, 175, 55, 0.35);
+}
+
+.modal-title {
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--color-gold-bright);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.modal-desc {
+  font-size: 13px;
+  color: #d1c7b8;
+  margin-bottom: 22px;
+  line-height: 1.6;
+}
+
+/* 升变受封选择卡片 */
+.promotion-choices {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.choice-btn {
+  width: 78px;
+  height: 88px;
+  background: #161a26;
+  border: 2px solid #444e66;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.choice-btn:hover {
+  border-color: var(--color-gold-bright);
+  background: #252e42;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+}
+.choice-icon {
+  width: 46px;
+  height: 46px;
+}
+.choice-label {
+  font-size: 11px;
+  color: #f0e6d6;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* 战役终局卡片 */
+.gameover-emblem {
+  font-size: 46px;
+  margin-bottom: 10px;
+}
+.gameover-title {
+  font-family: var(--font-title);
+  font-size: 26px;
+  color: var(--color-gold-bright);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+.gameover-reason {
+  font-size: 14px;
+  color: #f0e6d6;
+  margin-bottom: 8px;
+}
+.gameover-stats {
+  font-size: 12px;
+  color: #a69a88;
+  margin-bottom: 22px;
+}
+.gameover-actions {
+  display: flex;
+  justify-content: center;
+}
+.medieval-btn.btn-primary {
+  padding: 12px 36px;
+  font-size: 14px;
+  border-color: var(--color-gold);
+  background: linear-gradient(180deg, #3d4c6e 0%, #1b2232 100%);
+}
+
+/* 响应式排版 */
+@media (max-width: 1240px) {
+  .duel-arena {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .player-panel {
+    width: 100%;
+    max-width: 680px;
+  }
+  .board-3d-container {
+    height: 500px;
+  }
+}
+@media (max-width: 640px) {
+  .board-3d-container {
+    height: 400px;
+  }
+  .game-title {
+    font-size: 24px;
+  }
+  .view-controls {
+    top: 6px;
+    left: 8px;
+  }
+  .view-btn {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+}

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👑 极光游戏港 · 站长最高独立控制台</title>
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    /* 会员全维度详情与修改模态弹窗 */
+    .user-edit-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(16px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .user-edit-modal.active { display: flex; }
+    .user-edit-card {
+      background: #0d121f;
+      border: 1px solid var(--gold-primary);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 680px;
+      padding: 32px;
+      box-shadow: 0 0 50px var(--gold-glow);
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .edit-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .edit-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .edit-form-group.full {
+      grid-column: 1 / -1;
+    }
+    .edit-form-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .stats-chip-row {
+      display: flex;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .stats-chip {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .stats-chip strong {
+      color: var(--gold-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       1. 站长专属三重凭证核验门禁终端 (Triple Credential Gate)
+       ========================================== -->
+  <div id="adminAuthGate" class="admin-auth-gate">
+    <div class="auth-gate-card">
+      <div class="gate-header">
+        <div class="gate-icon">👑</div>
+        <h2 class="gate-title">站长专属身份核验终端</h2>
+        <p class="gate-subtitle">SUPREME ADMIN TRIPLE-FACTOR AUTHENTICATION</p>
+      </div>
+
+      <div id="gateErrorBanner" class="gate-error-banner">
+        <span>⚠️</span>
+        <span id="gateErrorText">核验未通过，请检查凭证！</span>
+      </div>
+
+      <form id="gateAuthForm" style="display: flex; flex-direction: column; gap: 14px;" autocomplete="off">
+        <div class="gate-form-group">
+          <label class="gate-label">1. 站长绑定电子邮箱 (Email) *</label>
+          <input type="email" id="gateEmail" class="gate-input" placeholder="请输入站长绑定的电子邮箱" required autocomplete="off">
+        </div>
+
+        <div class="gate-form-group">
+          <label class="gate-label">2. 管理员用户名 (Username) *</label>
+          <input type="text" id="gateUsername" class="gate-input" placeholder="请输入管理员用户名" required autocomplete="off">
+        </div>
+
+        <div class="gate-form-group">
+          <label class="gate-label">3. 站长最高安全主密码 (Password) *</label>
+          <input type="password" id="gatePassword" class="gate-input" placeholder="请输入站长最高安全密码" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="admin-btn btn-gold" style="padding: 12px; font-size: 15px; font-weight: 800; justify-content: center; margin-top: 8px;">
+          ⚡ 验证管理员凭证并进入最高控制台
+        </button>
+
+        <div style="display: flex; justify-content: flex-end; font-size: 12px; color: var(--text-dim); margin-top: 4px;">
+          <a href="../index.html" style="color: var(--text-muted); text-decoration: none;">← 返回玩家大厅</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       2. 站长主控制台界面
+       ========================================== -->
+  <div id="adminApp" style="display: none; flex-direction: column; min-height: 100vh;">
+    <!-- 顶部独立导航 -->
+    <header class="admin-navbar">
+      <div class="admin-brand">
+        <div class="admin-logo-badge">👑</div>
+        <div class="admin-title-text">
+          <h1>极光游戏港 · 站长最高控制台</h1>
+          <span>SUPER ADMIN SUPREME COMMAND</span>
+        </div>
+      </div>
+
+      <!-- 中间主导航标签 -->
+      <nav class="admin-nav-tabs">
+        <button class="admin-tab-btn active" data-tab="overview">📊 运营总览</button>
+        <button class="admin-tab-btn" data-tab="members">👥 会员全维管理</button>
+        <button class="admin-tab-btn" data-tab="staff-apps">📋 职位任命</button>
+        <button class="admin-tab-btn" data-tab="games">🎮 游戏监控</button>
+        <button class="admin-tab-btn" data-tab="audit">🛡️ 封控日志</button>
+      </nav>
+
+      <!-- 右侧快捷区 -->
+      <div class="admin-right-actions">
+        <a href="../staff-workbench.html" class="admin-btn btn-secondary" title="打开管理团队协作工作台">
+          🛠️ 管理员工作台
+        </a>
+        <button id="lockTerminalBtn" class="admin-btn btn-secondary" style="border-color: rgba(245,158,11,0.4); color: #fbbf24;" title="重新锁定终端">
+          🔒 锁定控制台
+        </button>
+        <a href="../index.html" class="admin-btn btn-gold" title="返回前台大厅">
+          🎮 返回大厅
+        </a>
+      </div>
+    </header>
+
+    <!-- 主工作区 -->
+    <main class="admin-main">
+
+      <!-- ================= 标签页 1：运营总览 ================= -->
+      <section id="tab-overview" class="tab-pane active">
+        <div class="stats-cards-grid">
+          <div class="stat-card">
+            <div class="stat-card-left">
+              <span>全站注册会员</span>
+              <h3 id="statTotalUsers">0</h3>
+            </div>
+            <div class="stat-card-icon">👥</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-left">
+              <span>已上架游戏数</span>
+              <h3 id="statTotalGames">0</h3>
+            </div>
+            <div class="stat-card-icon">🎮</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-left">
+              <span>待任命职务申请</span>
+              <h3 id="statPendingApps" style="color: #38bdf8;">0</h3>
+            </div>
+            <div class="stat-card-icon">📋</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-left">
+              <span>违规待裁决工单</span>
+              <h3 id="statOpenTickets" style="color: #f87171;">0</h3>
+            </div>
+            <div class="stat-card-icon">🛡️</div>
+          </div>
+        </div>
+
+        <div class="admin-panel-card">
+          <div class="panel-header-row">
+            <div class="panel-title-group">
+              <h2><span>🚀</span> 站长最高指挥与会员全权管控</h2>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+              <h4 style="color: #fbbf24; margin-bottom: 8px;">👑 站长特权</h4>
+              <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">拥有跨岗位越权裁决、一键修改会员所有资料与封控等级、撤换任命管理员与全量下架游戏的最高权力。</p>
+            </div>
+            <div style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+              <h4 style="color: #38bdf8; margin-bottom: 8px;">🎮 游戏品控流</h4>
+              <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">由【审核管理员】负责沙箱试玩，再由【后台控制员】复核上架，站长可随时在游戏监控中查看全量数据。</p>
+            </div>
+            <div style="background: rgba(0,0,0,0.25); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+              <h4 style="color: #f472b6; margin-bottom: 8px;">🛡️ 纪律风控流</h4>
+              <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">由【巡查管理员】发现作弊或违规并提交工单，【封控管理员】执行阶梯封停处罚。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 标签页 2：会员全景管理 ================= -->
+      <section id="tab-members" class="tab-pane">
+        <div class="admin-panel-card">
+          <div class="panel-header-row">
+            <div class="panel-title-group">
+              <h2><span>👥</span> 全站会员花名册 (点击任意用户可修改全项信息与封控等级)</h2>
+            </div>
+            <div class="filter-search-box">
+              <input type="text" id="memberSearchInput" class="admin-input" placeholder="搜索用户名 / 昵称 / 邮箱...">
+              <select id="memberRoleFilter" class="admin-input">
+                <option value="all">所有角色</option>
+                <option value="super_admin">👑 站长</option>
+                <option value="game_reviewer">🎮 审核员</option>
+                <option value="release_controller">⚙️ 控制员</option>
+                <option value="inspector">👁️ 巡查员</option>
+                <option value="enforcer">🛡️ 封控员</option>
+                <option value="creator">🛠️ 创作者</option>
+                <option value="player">🕹️ 玩家</option>
+              </select>
+              <select id="memberSanctionFilter" class="admin-input">
+                <option value="all">所有封控状态</option>
+                <option value="0">🟢 正常活跃</option>
+                <option value="1">🟡 等级1: 轻度警告</option>
+                <option value="2">🟠 等级2: 冻结投稿</option>
+                <option value="3">🟣 等级3: 禁言禁评</option>
+                <option value="4">🔴 等级4: 封号30天</option>
+                <option value="5">💀 等级5: 永久封杀</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>用户标识</th>
+                  <th>头像 / 昵称</th>
+                  <th>账号 / 邮箱</th>
+                  <th>当前角色</th>
+                  <th>封控等级</th>
+                  <th>注册时间</th>
+                  <th>站长全权操作</th>
+                </tr>
+              </thead>
+              <tbody id="memberTableBody">
+                <!-- 动态生成 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 标签页 3：管理团队任命审批 ================= -->
+      <section id="tab-staff-apps" class="tab-pane">
+        <div class="admin-panel-card">
+          <div class="panel-header-row">
+            <div class="panel-title-group">
+              <h2><span>📋</span> 管理员申请审批中心</h2>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>申请人</th>
+                  <th>意向申请岗位</th>
+                  <th>申请陈词与经验</th>
+                  <th>申请时间</th>
+                  <th>审批状态</th>
+                  <th>站长裁决</th>
+                </tr>
+              </thead>
+              <tbody id="staffAppTableBody">
+                <!-- 动态生成 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 标签页 4：全量游戏监控 ================= -->
+      <section id="tab-games" class="tab-pane">
+        <div class="admin-panel-card">
+          <div class="panel-header-row">
+            <div class="panel-title-group">
+              <h2><span>🎮</span> 全网游戏监控与终极下架</h2>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>图标</th>
+                  <th>游戏名称</th>
+                  <th>分类</th>
+                  <th>来源 / 作者</th>
+                  <th>玩法说明</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="gameMonitorTableBody">
+                <!-- 动态生成 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 标签页 5：违规封控追溯日志 ================= -->
+      <section id="tab-audit" class="tab-pane">
+        <div class="admin-panel-card">
+          <div class="panel-header-row">
+            <div class="panel-title-group">
+              <h2><span>🛡️</span> 巡查与封控执行日志</h2>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>工单编号</th>
+                  <th>违规对象</th>
+                  <th>违规类型</th>
+                  <th>巡查取证说明</th>
+                  <th>裁决结果 / 封禁级别</th>
+                  <th>处理状态</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody">
+                <!-- 动态生成 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       3. 会员全维度信息与封控修改模态弹窗 (User Inspector & Editor)
+       ========================================== -->
+  <div id="userEditModal" class="user-edit-modal">
+    <div class="user-edit-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--admin-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 800; color: var(--gold-primary); display: flex; align-items: center; gap: 8px;">
+          <span>🛠️</span> 编辑与封控管理会员信息
+        </h3>
+        <button id="closeUserEditBtn" class="admin-btn btn-secondary" style="border: none;">✕</button>
+      </div>
+
+      <!-- 用户数据统计摘要 -->
+      <div class="stats-chip-row">
+        <div class="stats-chip">用户UID: <strong id="editModalUid">-</strong></div>
+        <div class="stats-chip">注册时间: <strong id="editModalCreatedAt">-</strong></div>
+        <div class="stats-chip">最后登录: <strong id="editModalLastLogin">-</strong></div>
+        <div class="stats-chip">投稿作品: <strong id="editModalSubCount">0</strong> 款</div>
+      </div>
+
+      <!-- 修改表单 -->
+      <form id="userEditForm" class="edit-form-grid">
+        <input type="hidden" id="editUserId">
+
+        <div class="edit-form-group">
+          <label class="edit-form-label">登录用户名 (不可修改)</label>
+          <input type="text" id="editUsername" class="admin-input" disabled style="opacity: 0.6;">
+        </div>
+
+        <div class="edit-form-group">
+          <label class="edit-form-label">电子邮箱 *</label>
+          <input type="email" id="editEmail" class="admin-input" required>
+        </div>
+
+        <div class="edit-form-group">
+          <label class="edit-form-label">玩家昵称 *</label>
+          <input type="text" id="editNickname" class="admin-input" required>
+        </div>
+
+        <div class="edit-form-group">
+          <label class="edit-form-label">登录密码 (站长可直接查看与重置) *</label>
+          <input type="text" id="editPassword" class="admin-input" required>
+        </div>
+
+        <div class="edit-form-group">
+          <label class="edit-form-label">用户头像 (Emoji) *</label>
+          <input type="text" id="editAvatar" class="admin-input" placeholder="例如：🎮, 👑, 🚀" required>
+        </div>
+
+        <div class="edit-form-group">
+          <label class="edit-form-label">职位角色 (Role) *</label>
+          <select id="editRole" class="admin-input" style="background: #0f172a;" required>
+            <option value="super_admin">👑 站长 (Super Admin - 唯一最高特权)</option>
+            <option value="game_reviewer">🎮 游戏审核管理员 (负责沙箱试玩初审)</option>
+            <option value="release_controller">⚙️ 后台控制管理员 (负责终审上架)</option>
+            <option value="inspector">👁️ 巡查管理员 (负责日常巡视取证)</option>
+            <option value="enforcer">🛡️ 封控管理员 (负责违规惩处封控)</option>
+            <option value="creator">🛠️ 独立创作者 (认证游戏创作者)</option>
+            <option value="player">🕹️ 正式玩家 (普通会员)</option>
+          </select>
+        </div>
+
+        <!-- 封控等级核心选择项 -->
+        <div class="edit-form-group full" style="background: rgba(239, 68, 68, 0.05); padding: 14px; border-radius: 10px; border: 1px solid rgba(239, 68, 68, 0.2);">
+          <label class="edit-form-label" style="color: #fca5a5;">⚡ 封控惩处等级 (Sanction Level) *</label>
+          <select id="editSanctionLevel" class="admin-input" style="background: #0f172a; width: 100%; margin-top: 6px; font-weight: 700;" required>
+            <option value="0">🟢 等级 0: 正常活跃 (无任何限制，完全正常状态)</option>
+            <option value="1">🟡 等级 1: 轻度警告 (清空异常作弊战绩，记黄牌警告)</option>
+            <option value="2">🟠 等级 2: 中度封控 (冻结游戏投稿工坊权限，禁止提交游戏)</option>
+            <option value="3">🟣 等级 3: 严格封控 (全站禁言与禁止评论互动)</option>
+            <option value="4">🔴 等级 4: 重度封禁 (封停账号 30 天，无法登录)</option>
+            <option value="5">💀 等级 5: 终极封杀 (永久封停 / 加入全站黑名单)</option>
+          </select>
+        </div>
+
+        <div class="edit-form-group full">
+          <label class="edit-form-label">站长专属备忘录 (仅站长可见)</label>
+          <textarea id="editAdminNotes" class="admin-input" style="height: 60px; font-family: inherit;" placeholder="记录该用户的违规历史、特长或站长备忘信息..."></textarea>
+        </div>
+
+        <div class="edit-form-group full" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+          <button type="button" id="cancelUserEditBtn" class="admin-btn btn-secondary" style="padding: 10px 20px;">取消</button>
+          <button type="submit" class="admin-btn btn-gold" style="padding: 10px 28px; font-size: 14px;">💾 保存修改并立即生效</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 依赖脚本 -->
+  <script src="../js/games-data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

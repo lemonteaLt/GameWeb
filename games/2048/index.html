@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>2048 经典版 - 鼠标拖动与方块图鉴</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-wrapper">
+    <!-- 头部信息与计分栏 -->
+    <header class="game-header">
+      <div class="title-area">
+        <h1 class="game-title">2048</h1>
+        <p class="subtitle">经典数字合并 · 动态体量版</p>
+      </div>
+      <div class="scores-container">
+        <div class="score-box">
+          <span class="score-label">当前得分</span>
+          <span id="score" class="score-value">0</span>
+          <div id="score-addition" class="score-addition"></div>
+        </div>
+        <div class="score-box best-box">
+          <span class="score-label">历史最高</span>
+          <span id="best-score" class="score-value">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 操作提示与功能按钮栏 -->
+    <div class="game-intro">
+      <div class="guide-text">
+        <span class="mouse-icon">🖱️</span> <strong>鼠标按住并拖动</strong> 棋盘即可滑动方块（支持滑动与方向键）
+      </div>
+      <div class="actions">
+        <button id="handbook-btn" class="btn handbook-btn" title="查看所有阶段方块的外观与体量">📖 方块图鉴</button>
+        <button id="restart-btn" class="btn primary-btn">重新开始</button>
+      </div>
+    </div>
+
+    <!-- 游戏棋盘区域 -->
+    <div class="board-outer-container">
+      <div id="game-board" class="game-board">
+        <!-- 4x4 背景网格单元格 -->
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+
+        <!-- 动态数字方块渲染层 -->
+        <div id="tile-container" class="tile-container"></div>
+
+        <!-- 鼠标拖动实时方向指示器 -->
+        <div id="drag-indicator" class="drag-indicator">
+          <div class="drag-arrow"></div>
+        </div>
+      </div>
+
+      <!-- 游戏结束/胜利达成浮层 -->
+      <div id="game-message" class="game-message">
+        <p id="game-message-text">游戏结束</p>
+        <div class="game-message-sub" id="game-message-sub">没有可合并的方块了！</div>
+        <div class="message-actions">
+          <button id="retry-btn" class="btn primary-btn">再试一次</button>
+          <button id="keep-going-btn" class="btn secondary-btn hide">继续挑战</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📖 方块图鉴浮层 (展示所有阶段方块的外观、颜色、体积与特效) -->
+    <div id="handbook-modal" class="modal-overlay">
+      <div class="modal-content handbook-modal-content">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <h2>📖 2048 方块阶段全景图鉴</h2>
+            <span class="modal-subtitle">随着数字从 2 增长至 65536+，方块体量与光效逐步膨胀跃迁</span>
+          </div>
+          <button id="close-handbook-btn" class="close-btn" aria-label="关闭图鉴">&times;</button>
+        </div>
+        
+        <div id="handbook-list" class="handbook-grid">
+          <!-- JS 自动生成各阶段方块卡片 -->
+        </div>
+
+        <div class="modal-footer">
+          <button id="close-handbook-footer-btn" class="btn primary-btn">返回游戏</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 游戏特色说明卡片 -->
+    <footer class="game-footer">
+      <div class="rules-card">
+        <h3>✨ 游戏特色说明：</h3>
+        <ul>
+          <li><strong>鼠标拖动操作：</strong> 按住鼠标左键在棋盘上向任意方向拖动，即可全盘推移方块。</li>
+          <li><strong>圆角与专属配色：</strong> 方块均配有精致圆角，每个阶段的数字拥有独立的专属色彩。</li>
+          <li><strong>体量动态增长：</strong> 最小数字为 2（体量 82% 紧凑），随着数字合成增长，方块体型变大并附带华丽光晕与动画！</li>
+          <li><strong>阶段图鉴：</strong> 点击右上角 <strong>“📖 方块图鉴”</strong> 可以随时预览从 2 到 65536+ 所有形态的方块。</li>
+        </ul>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

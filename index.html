@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>极光游戏港 - 极简磨砂小游戏平台</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/player.css">
+</head>
+<body>
+
+  <!-- ==========================================
+       1. 顶部全局导航栏 (Header / Navbar)
+       ========================================== -->
+  <header class="site-header">
+    <div class="header-left">
+      <div class="brand-logo">🎮</div>
+      <div class="brand-title">极光游戏港</div>
+    </div>
+
+    <!-- 主导航菜单 (全部 / 分类 / 我的) -->
+    <nav class="header-nav">
+      <button class="nav-tab-btn active" data-view="all">
+        <span>📦</span> 全部
+      </button>
+      <button class="nav-tab-btn" data-view="categories">
+        <span>🏷️</span> 分类
+      </button>
+      <button class="nav-tab-btn" data-view="profile">
+        <span>👤</span> 我的
+      </button>
+    </nav>
+
+    <!-- 右侧工具快捷区 -->
+    <div class="header-right">
+      <!-- 搜索框 -->
+      <div class="search-box-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="搜索游戏...">
+      </div>
+
+      <!-- 全局静音开关 -->
+      <button id="muteBtn" class="mute-toggle-btn" title="开关全局声音">🔊</button>
+
+      <!-- 未登录按钮 -->
+      <button id="navLoginBtn" class="stage-control-btn" style="background: var(--accent-color); border: none; font-weight: 700;">
+        🔑 登录 / 注册
+      </button>
+
+      <!-- 已登录个人卡片与下拉菜单 -->
+      <div id="userBadge" class="user-profile-badge" style="display: none; position: relative;" title="个人中心">
+        <div id="userBadgeAvatar" class="user-badge-avatar">🎮</div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+          <div id="userBadgeName" class="user-badge-name">游戏探索者</div>
+          <span id="userRoleBadge" class="pill-tag pill-muted" style="font-size: 9px; padding: 1px 6px;">🕹️ 正式玩家</span>
+        </div>
+
+        <!-- 个人快捷下拉菜单 -->
+        <div id="userDropdownMenu" class="glass-panel" style="display: none; position: absolute; top: 48px; right: 0; min-width: 180px; padding: 8px; flex-direction: column; gap: 4px; z-index: 1000;">
+          <button class="stage-control-btn" id="menuMyProfile" style="width: 100%; justify-content: flex-start; border: none;">👤 个人中心</button>
+          <a href="admin.html" class="stage-control-btn" style="width: 100%; justify-content: flex-start; text-decoration: none; border: none;">📤 提交新游戏</a>
+          <a id="menuAdminPortal" href="admin-portal/index.html" class="stage-control-btn" style="width: 100%; justify-content: flex-start; color: #fbbf24; text-decoration: none; border: none; display: none;">👑 站长最高后台</a>
+          <a id="menuWorkbench" href="staff-workbench.html" class="stage-control-btn" style="width: 100%; justify-content: flex-start; color: #38bdf8; text-decoration: none; border: none; display: none;">🛡️ 管理团队工作台</a>
+          <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0;"></div>
+          <button class="stage-control-btn" id="menuLogout" style="width: 100%; justify-content: flex-start; color: #f87171; border: none;">🚪 退出登录</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       2. 主内容视口区 (Main Container)
+       ========================================== -->
+  <main class="app-container">
+
+    <!-- 视图 1：全部游戏大厅 (All Games) -->
+    <section id="viewAll" class="view-section active">
+      <div id="allGamesGrid" class="games-grid">
+        <!-- 动态渲染游戏卡片 -->
+      </div>
+    </section>
+
+    <!-- 视图 2：分类长方形规整矩阵 (Categories Matrix) -->
+    <section id="viewCategories" class="view-section">
+      <div class="category-matrix-container">
+        <h2 class="category-matrix-title">游戏分类索引</h2>
+        <p class="category-matrix-subtitle">精选各类主题小游戏，即点即玩</p>
+        <div id="categoryMatrixGrid" class="category-matrix-grid">
+          <!-- 动态渲染 3x2 规整长方形矩阵方块 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 视图 2.1：分类详情内页 (Category Detail) -->
+    <section id="viewCategoryDetail" class="view-section">
+      <div class="category-detail-header">
+        <h2 id="categoryDetailTitle" style="font-size: 24px; font-weight: 700;">分类游戏</h2>
+        <button id="backToMatrixBtn" class="back-btn">
+          <span>←</span> 返回分类矩阵
+        </button>
+      </div>
+      <div id="categoryDetailGrid" class="games-grid">
+        <!-- 动态渲染分类内游戏卡片 -->
+      </div>
+    </section>
+
+    <!-- 视图 3：“我的” 个人中心 (My Profile) -->
+    <section id="viewProfile" class="view-section">
+      <div class="profile-container">
+        <!-- 顶部个人档案卡片 -->
+        <div class="glass-panel profile-card">
+          <div class="profile-user-info">
+            <div id="profileAvatarLarge" class="profile-avatar-large" title="点击更换头像">
+              <span>🎮</span>
+              <div class="profile-avatar-badge-edit">✏️</div>
+            </div>
+            <div class="profile-name-edit-box">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="text" id="profileNicknameInput" class="profile-nickname-input" value="游戏探索者" title="点击修改昵称">
+                <span id="profileRoleBadge" class="pill-tag pill-muted">🕹️ 正式玩家</span>
+              </div>
+              <span style="font-size: 13px; color: var(--text-dim);">点击昵称或头像可直接修改</span>
+            </div>
+          </div>
+
+          <div class="profile-stats-summary">
+            <div class="profile-stat-item">
+              <div id="statFavoritesCount" class="profile-stat-value">0</div>
+              <div class="profile-stat-label">⭐ 我的收藏</div>
+            </div>
+            <div class="profile-stat-item">
+              <div id="statHistoryCount" class="profile-stat-value">0</div>
+              <div class="profile-stat-label">🕒 游玩历史</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 自动勋章展示墙 (不可手动自选) -->
+        <div class="glass-panel" style="padding: 20px 28px;">
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text-muted);">🎖️ 个人荣誉勋章墙 (系统根据行为自动解锁)</h3>
+          <div id="userBadgesWall" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <!-- 动态渲染勋章 -->
+          </div>
+        </div>
+
+        <!-- 子选项卡：我的收藏 / 历史记录 / 我的投稿 / 申请职位 / 账号安全 -->
+        <div class="profile-tabs" style="overflow-x: auto;">
+          <button class="profile-tab-btn active" data-tab="favorites">⭐ 我的收藏</button>
+          <button class="profile-tab-btn" data-tab="history">🕒 历史记录</button>
+          <button class="profile-tab-btn" data-tab="submissions">🛠️ 我的投稿</button>
+          <button class="profile-tab-btn" data-tab="apply-staff">📋 申请加入管理</button>
+          <button class="profile-tab-btn" data-tab="security">🔒 账号安全</button>
+        </div>
+
+        <!-- 1. 收藏夹容器 -->
+        <div id="profileFavoritesContainer">
+          <!-- 动态渲染收藏卡片 -->
+        </div>
+
+        <!-- 2. 历史记录容器 -->
+        <div id="profileHistoryContainer" style="display: none;">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+            <button id="clearHistoryBtn" class="stage-control-btn" style="color: #f87171;">🗑️ 清空历史记录</button>
+          </div>
+          <div id="historyList" class="history-list">
+            <!-- 动态渲染历史项 -->
+          </div>
+        </div>
+
+        <!-- 3. 我的投稿流转看板 (创作者中心) -->
+        <div id="profileSubmissionsContainer" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 16px; font-weight: 700;">我的游戏投稿列表</h3>
+            <a href="admin.html" class="stage-control-btn" style="background: var(--accent-color); border: none; font-weight: 700; text-decoration: none;">
+              🚀 提交新游戏
+            </a>
+          </div>
+          <div id="mySubmissionsList">
+            <!-- 动态渲染作品与审核流转状态 -->
+          </div>
+        </div>
+
+        <!-- 4. 加入管理团队申请表单 -->
+        <div id="profileApplyStaffContainer" style="display: none;">
+          <div class="glass-panel" style="padding: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">📋 申请成为极光管理团队成员</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+              申请提交后将直达<strong>站长最高独立控制台</strong>，站长将亲自查阅并审批任命。
+            </p>
+            <form id="applyStaffForm" style="display: flex; flex-direction: column; gap: 16px; max-width: 600px;">
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">意向申请职位 *</label>
+                <select id="applyTargetRole" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px; background: #0f172a;" required>
+                  <option value="game_reviewer">🎮 游戏审核管理员 (负责沙箱试玩与初审评估)</option>
+                  <option value="release_controller">⚙️ 后台控制管理员 (负责最终把关与发布上架)</option>
+                  <option value="inspector">👁️ 巡查管理员 (负责日常全站巡视与违规取证)</option>
+                  <option value="enforcer">🛡️ 封控管理员 (负责违规工单裁决与阶梯封停)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">申请陈词与经验优势 *</label>
+                <textarea id="applyStatement" class="search-input" style="width: 100%; height: 90px; border-radius: 8px; margin-top: 6px;" placeholder="例如：本人热爱小游戏，每日在线时间长，认真负责..." required></textarea>
+              </div>
+              <button type="submit" class="stage-control-btn" style="background: var(--accent-color); border: none; padding: 10px 24px; font-weight: 700; width: fit-content;">
+                📨 提交申请给站长审批
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- 5. 账号安全与密码修改 -->
+        <div id="profileSecurityContainer" style="display: none;">
+          <div class="glass-panel" style="padding: 24px; max-width: 500px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">🔒 修改登录密码</h3>
+            <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">当前旧密码 *</label>
+                <input type="password" id="oldPwdInput" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" required>
+              </div>
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">新密码 (至少6位) *</label>
+                <input type="password" id="newPwdInput" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" required>
+              </div>
+              <button type="submit" class="stage-control-btn" style="background: var(--accent-color); border: none; padding: 10px; font-weight: 700;">
+                保存修改新密码
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- 6. 站长专属独立后台入口 -->
+        <div style="margin-top: 24px; padding: 20px; background: rgba(245, 158, 11, 0.08); border: 1px solid var(--gold-primary); border-radius: var(--radius-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 16px;">
+          <div>
+            <div style="font-weight: 800; font-size: 16px; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+              <span>👑</span> 站长最高独立控制台 (会员信息/封控修改/全站监控)
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+              在此可查看全网所有注册用户、直接修改密码、调整职位与设置 0~5 级封控状态
+            </div>
+          </div>
+          <a href="admin-portal/index.html" class="stage-control-btn" style="background: var(--gold-primary); color: #000; border: none; font-weight: 800; padding: 10px 24px; text-decoration: none; white-space: nowrap;">
+            🚀 立即打开站长后台
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       3. 登录 / 注册 / 找回密码 通用磨砂弹窗 (Auth Modal)
+       ========================================== -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div id="authModalTitle" class="modal-title">🔑 账号通行证</div>
+        <button id="closeAuthBtn" class="modal-close-btn">✕</button>
+      </div>
+
+      <!-- 弹窗子标签页 -->
+      <div class="profile-tabs" style="margin-bottom: 16px;">
+        <button class="profile-tab-btn active" id="tabAuthLogin" data-auth="login">登录</button>
+        <button class="profile-tab-btn" id="tabAuthRegister" data-auth="register">注册</button>
+        <button class="profile-tab-btn" id="tabAuthForgot" data-auth="forgot">找回密码</button>
+      </div>
+
+      <!-- 1. 登录表单 -->
+      <form id="loginForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">用户名 或 绑定邮箱</label>
+          <input type="text" id="loginIdentifier" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" placeholder="请输入用户名或邮箱" required>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">密码</label>
+          <input type="password" id="loginPassword" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="stage-control-btn" style="background: var(--accent-color); border: none; padding: 10px; font-weight: 700; margin-top: 6px;">
+          🚀 立即登录
+        </button>
+      </form>
+
+      <!-- 2. 注册表单 -->
+      <form id="registerForm" style="display: none; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">用户名 (登录用) *</label>
+          <input type="text" id="regUsername" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 4px;" placeholder="至少3位字符" required>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">电子邮箱 (用于找回密码) *</label>
+          <input type="email" id="regEmail" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 4px;" placeholder="example@mail.com" required>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">密码 (至少6位) *</label>
+          <input type="password" id="regPassword" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 4px;" placeholder="设置密码" required>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">玩家昵称</label>
+          <input type="text" id="regNickname" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 4px;" placeholder="游戏内展示昵称">
+        </div>
+        <button type="submit" class="stage-control-btn" style="background: var(--accent-color); border: none; padding: 10px; font-weight: 700; margin-top: 6px;">
+          ✨ 完成注册并登录
+        </button>
+      </form>
+
+      <!-- 3. 邮箱验证找回密码表单 -->
+      <form id="forgotForm" style="display: none; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">绑定的注册邮箱 *</label>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <input type="email" id="forgotEmail" class="search-input" style="flex: 1; border-radius: 8px;" placeholder="输入绑定的邮箱" required>
+            <button type="button" id="btnSendResetCode" class="stage-control-btn" style="background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; white-space: nowrap;">
+              发送验证码
+            </button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">6位邮件验证码 *</label>
+          <input type="text" id="forgotCode" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" placeholder="输入邮箱收到的6位验证码" required>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 600;">设定新密码 *</label>
+          <input type="password" id="forgotNewPwd" class="search-input" style="width: 100%; border-radius: 8px; margin-top: 6px;" placeholder="至少6位新密码" required>
+        </div>
+        <button type="submit" class="stage-control-btn" style="background: var(--accent-color); border: none; padding: 10px; font-weight: 700; margin-top: 6px;">
+          ✅ 验证并重置密码
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       4. 沉浸式游戏游玩舞台 (Game Stage Modal)
+       ========================================== -->
+  <div id="gameStageOverlay" class="game-stage-overlay">
+    <div class="game-stage-container">
+      <div class="game-stage-header">
+        <div class="game-stage-title-group">
+          <span id="gameStageIcon" class="game-stage-icon">🎮</span>
+          <span id="gameStageTitle" class="game-stage-title">游戏加载中...</span>
+        </div>
+        <div class="game-stage-controls">
+          <button id="stageZoomBtn" class="stage-control-btn" title="放大/铺满屏幕">⛶ 放大模式</button>
+          <button id="stageCloseBtn" class="stage-control-btn stage-close-btn" title="按 ESC 键或点击退出">✕</button>
+        </div>
+      </div>
+
+      <div class="game-frame-wrapper">
+        <iframe id="gameIframe" class="game-iframe" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+      </div>
+
+      <div class="game-stage-details">
+        <div class="game-details-heading">
+          <span>📖 玩法介绍</span>
+        </div>
+        <p id="gameStageDesc" class="game-details-description"></p>
+        <div id="gameStageControlsLegend" class="game-controls-legend">
+          <!-- 动态渲染按键图 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       5. 排行榜与战绩弹窗 (Podium Modal)
+       ========================================== -->
+  <div id="rankingModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div id="rankingGameTitle" class="modal-title">🏆 排行榜</div>
+        <button id="closeRankingBtn" class="modal-close-btn">✕</button>
+      </div>
+      <div id="rankingList" class="rank-list">
+        <!-- 动态生成排行榜数据 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       6. 玩家头像选择弹窗 (Avatar Modal)
+       ========================================== -->
+  <div id="avatarModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🎨 选择专属头像</div>
+        <button id="closeAvatarBtn" class="modal-close-btn">✕</button>
+      </div>
+      <div id="avatarGrid" class="avatar-grid">
+        <!-- 动态渲染头像选项 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本引入 -->
+  <script src="js/games-data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

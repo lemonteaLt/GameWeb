@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>像素贪吃蛇 | Retro Pixel Snake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="arcade-cabinet">
+        <!-- 顶部装饰与标题 -->
+        <header class="arcade-header">
+            <div class="header-decor left-decor">■ ■ ■</div>
+            <h1 class="pixel-title">PIXEL SNAKE</h1>
+            <div class="header-decor right-decor">■ ■ ■</div>
+        </header>
+
+        <!-- 状态栏 -->
+        <div class="status-panel pixel-box">
+            <div class="stat-item">
+                <span class="stat-label">分数 SCORE</span>
+                <span id="current-score" class="stat-value">00000</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">最高分 HIGH</span>
+                <span id="high-score" class="stat-value">00000</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">难度 LEVEL</span>
+                <span id="current-difficulty-tag" class="stat-value diff-normal">普通</span>
+            </div>
+        </div>
+
+        <!-- 游戏视口与画布 -->
+        <div class="screen-frame">
+            <div class="screen-bezel">
+                <canvas id="game-canvas" width="400" height="400"></canvas>
+
+                <!-- 开始/难度选择遮罩 -->
+                <div id="start-overlay" class="overlay-screen active">
+                    <div class="overlay-card pixel-box">
+                        <div class="logo-animation">
+                            <span class="snake-pixel-char">🐍</span>
+                            <h2>像素贪吃蛇</h2>
+                        </div>
+                        <p class="subtitle">请选择游戏难度：</p>
+                        <div class="difficulty-group">
+                            <button class="pixel-btn diff-btn" data-diff="easy">
+                                <span class="diff-title">🌱 简单</span>
+                                <span class="diff-desc">慢速 (160ms)</span>
+                            </button>
+                            <button class="pixel-btn diff-btn selected" data-diff="medium">
+                                <span class="diff-title">⚔️ 普通</span>
+                                <span class="diff-desc">中速 (110ms)</span>
+                            </button>
+                            <button class="pixel-btn diff-btn" data-diff="hard">
+                                <span class="diff-title">🔥 困难</span>
+                                <span class="diff-desc">快速 (75ms)</span>
+                            </button>
+                            <button class="pixel-btn diff-btn" data-diff="hell">
+                                <span class="diff-title">💀 地狱</span>
+                                <span class="diff-desc">极速 (45ms)</span>
+                            </button>
+                        </div>
+                        <button id="btn-start-game" class="pixel-btn primary-btn start-glow-btn">
+                            ▶ 开始游戏 (SPACE)
+                        </button>
+                        <div class="rule-hint">
+                            <span>⚠ 规则：碰壁即死 · 咬自己即死</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 游戏结束遮罩 -->
+                <div id="gameover-overlay" class="overlay-screen">
+                    <div class="overlay-card pixel-box gameover-box">
+                        <h2 class="gameover-title">GAME OVER</h2>
+                        <p id="gameover-reason" class="gameover-reason">撞击边界，小蛇阵亡！</p>
+                        
+                        <div class="score-summary">
+                            <div class="summary-row">
+                                <span>本局得分：</span>
+                                <strong id="final-score">0</strong>
+                            </div>
+                            <div class="summary-row">
+                                <span>吃掉苹果：</span>
+                                <strong id="final-apples">0</strong>
+                            </div>
+                            <div id="new-record-tag" class="new-record hidden">★ 刷新纪录 NEW RECORD ★</div>
+                        </div>
+
+                        <div class="gameover-actions">
+                            <button id="btn-restart" class="pixel-btn primary-btn">
+                                ↺ 再来一局 (SPACE)
+                            </button>
+                            <button id="btn-change-diff" class="pixel-btn">
+                                ⚙ 切换难度
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 暂停遮罩 -->
+                <div id="pause-overlay" class="overlay-screen">
+                    <div class="overlay-card pixel-box pause-box">
+                        <h2>PAUSED</h2>
+                        <p>按 空格键 或 P 键继续</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部控制与操作说明 -->
+        <div class="control-panel">
+            <div class="help-box pixel-box">
+                <div class="help-title">操作指南</div>
+                <div class="help-keys">
+                    <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> : 移动</span>
+                    <span><kbd>SPACE</kbd> / <kbd>P</kbd> : 暂停/继续</span>
+                    <span><kbd>R</kbd> : 重新开始</span>
+                </div>
+            </div>
+
+            <div class="sound-toggle-box">
+                <button id="btn-sound-toggle" class="pixel-btn icon-btn" title="开关音效">
+                    <span id="sound-icon">🔊</span> 音效: 开
+                </button>
+                <button id="btn-crt-toggle" class="pixel-btn icon-btn" title="CRT复古滤镜开关">
+                    <span id="crt-icon">📺</span> 显像管: 开
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端/触摸虚拟手柄 -->
+        <div class="touch-controls">
+            <div class="dpad-grid">
+                <button class="dpad-btn up" data-dir="UP">▲</button>
+                <button class="dpad-btn left" data-dir="LEFT">◀</button>
+                <button class="dpad-btn center" id="touch-pause-btn">⏸</button>
+                <button class="dpad-btn right" data-dir="RIGHT">▶</button>
+                <button class="dpad-btn down" data-dir="DOWN">▼</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音效与游戏脚本 -->
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
