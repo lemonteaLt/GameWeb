@@ -79,16 +79,20 @@ class Board3D {
     this.scene.add(this.highlightGroup);
     this.updateCoordinatesDisplay();
 
-    // 9. 事件绑定
+    // 9. 事件绑定与自适应观测器
     this.pointerDownPos = { x: 0, y: 0 };
     window.addEventListener('resize', () => this.onResize());
+    if (typeof ResizeObserver !== 'undefined' && this.container) {
+      const ro = new ResizeObserver(() => this.onResize());
+      ro.observe(this.container);
+    }
     this.renderer.domElement.addEventListener('pointerdown', (e) => {
       this.pointerDownPos = { x: e.clientX, y: e.clientY };
     });
     this.renderer.domElement.addEventListener('pointerup', (e) => {
-      if (e.button !== 0) return; // 仅左键点击响应走棋
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
       const dist = Math.hypot(e.clientX - this.pointerDownPos.x, e.clientY - this.pointerDownPos.y);
-      if (dist < 6) { // 阈值判定为单击而非镜头拖拽
+      if (dist < 10) { // 阈值判定为单击而非镜头拖拽 (支持触屏微抖动)
         this.handleClickAt(e.clientX, e.clientY);
       }
     });

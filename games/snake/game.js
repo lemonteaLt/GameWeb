@@ -636,6 +636,45 @@ class SnakeGame {
                 this.togglePause();
             }
         });
+
+        // 手机端全屏滑动手势支持 (Touch Swipe Gestures)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const cabinet = document.querySelector('.arcade-cabinet') || document.body;
+
+        cabinet.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.pixel-btn') || e.target.closest('.dpad-btn')) return;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        }, { passive: true });
+
+        cabinet.addEventListener('touchmove', (e) => {
+            if (this.gameState === 'PLAYING') {
+                e.preventDefault(); // 阻止手机浏览器下拉刷新
+            }
+        }, { passive: false });
+
+        cabinet.addEventListener('touchend', (e) => {
+            if (e.target.closest('.pixel-btn') || e.target.closest('.dpad-btn')) return;
+            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            const touch = e.changedTouches[0];
+            const dx = touch.clientX - touchStartX;
+            const dy = touch.clientY - touchStartY;
+            const minSwipe = 20;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (Math.abs(dx) > minSwipe) {
+                    if (dx > 0) this.handleDirectionInput(DIRECTION.RIGHT);
+                    else this.handleDirectionInput(DIRECTION.LEFT);
+                }
+            } else {
+                if (Math.abs(dy) > minSwipe) {
+                    if (dy > 0) this.handleDirectionInput(DIRECTION.DOWN);
+                    else this.handleDirectionInput(DIRECTION.UP);
+                }
+            }
+        }, { passive: true });
     }
 }
 
