@@ -440,8 +440,8 @@ class ChineseChessApp {
     this.currentTurn = nextTurn;
     this.updatePlayerCards();
 
-    // 3. 等待棋子平滑滑行彻底到位 (300ms)
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // 3. 等待棋子滑行到位 (160ms)
+    await new Promise(resolve => setTimeout(resolve, 160));
     this.isMoving = false;
 
     // 4. 检查胜负与将军状态
@@ -460,7 +460,7 @@ class ChineseChessApp {
       this.updateStatusBanner(`轮到${this.currentTurn === 'r' ? '红方' : '黑方'}走棋 · ${notation}`);
     }
 
-    // 5. 棋子已完全就位，触发 AI 后台线程思考
+    // 5. 棋子已就位，触发 AI 后台线程思考
     if (this.isCurrentTurnAi() && !this.isGameOver) {
       this.triggerAiMove();
     }
@@ -472,15 +472,15 @@ class ChineseChessApp {
   async triggerAiMove() {
     this.isAiThinking = true;
     this.updatePlayerCards();
-    this.updateStatusBanner(`电脑 (${this.getDifficultyName()}) 正在思考妙着...`);
+    this.updateStatusBanner(`电脑 (${this.getDifficultyName()}) 正在出招...`);
 
     const startTime = Date.now();
     const bestMove = await ChessAI.getBestMove(this.board, this.currentTurn, this.aiDifficulty);
     const elapsed = Date.now() - startTime;
 
-    // 确保至少有 260ms 的思考节奏感，避免快棋瞬间秒下令人眼花
-    if (elapsed < 260) {
-      await new Promise(resolve => setTimeout(resolve, 260 - elapsed));
+    // 保留微小的自然走棋节奏 (80ms)
+    if (elapsed < 80) {
+      await new Promise(resolve => setTimeout(resolve, 80 - elapsed));
     }
 
     this.isAiThinking = false;
